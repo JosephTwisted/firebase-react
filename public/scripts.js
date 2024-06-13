@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
  
      setInterval(updateOrderTimes, 60000);
  
-     function addOrder() {
+     window.addOrder = function() {
          let lastOrderTime = 0;
          if (ordersInProgress.length > 0) {
              lastOrderTime = Math.max(...ordersInProgress.map(order => order.timeLeft));
@@ -184,13 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
              saveOrders();
          }
      }
- 
-     // Add event listener for Enter key
-     document.addEventListener('keydown', (event) => {
-         if (event.key === 'Enter') {
-             addOrder();
-         }
-     });
  
      orderReadyOverlay.addEventListener('click', hideOrderReadyOverlay);
  
