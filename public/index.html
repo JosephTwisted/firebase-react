@@ -37,14 +37,14 @@
     <script>
         // Firebase configuration
         const firebaseConfig = {
-        apiKey: "AIzaSyCq-IM7ymRZWD_cQDEarXeB2rH2rGkus0k",
-        authDomain: "react-firebase-1211.firebaseapp.com",
-        databaseURL: "https://react-firebase-1211-default-rtdb.europe-west1.firebasedatabase.app/",
-        projectId: "react-firebase-1211",
-        storageBucket: "react-firebase-1211.appspot.com",
-        messagingSenderId: "497921033555",
-        appId: "1:497921033555:web:ed7f6f22ac466bc1e90da6"
-    };
+            apiKey: "AIzaSyCq-IM7ymRZWD_cQDEarXeB2rH2rGkus0k",
+            authDomain: "react-firebase-1211.firebaseapp.com",
+            databaseURL: "https://react-firebase-1211-default-rtdb.europe-west1.firebasedatabase.app/",
+            projectId: "react-firebase-1211",
+            storageBucket: "react-firebase-1211.appspot.com",
+            messagingSenderId: "497921033555",
+            appId: "1:497921033555:web:ed7f6f22ac466bc1e90da6"
+        };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -226,13 +226,13 @@
             renderOrders();
         });
 
-        window.hideOrderReadyOverlay = function () {
+        window.hideOrderReadyOverlay = function() {
             const orderReadyOverlay = document.getElementById('order-ready-overlay');
             const videoContainer = document.getElementById('video-container');
 
             orderReadyOverlay.style.display = 'none';
             videoContainer.classList.remove('blur');
-        }
+        };
     </script>
 </body>
 </html>
