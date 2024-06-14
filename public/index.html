@@ -13,8 +13,49 @@
 
     <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    
+    <!-- Loader CSS -->
+    <style>
+        .loader {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+            z-index: 9999;
+        }
+
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        body.loading {
+            overflow: hidden;
+        }
+
+        body.loading .loader {
+            display: block;
+        }
+
+        body.loaded .loader {
+            display: none;
+        }
+    </style>
 </head>
-<body>
+<body class="loading">
+    <div class="loader"></div>
     <div id="last-order-number"></div>
     <div id="video-container">
         <iframe id="background-video" src="https://www.youtube.com/embed/jReeajPdgSM?autoplay=1&mute=1&loop=1&playlist=jReeajPdgSM" frameborder="0" allow="autoplay; loop;" allowfullscreen></iframe>
@@ -65,11 +106,13 @@
             database.ref('ordersinprogress').on('value', snapshot => {
                 ordersInProgress = snapshot.val() ? Object.values(snapshot.val()) : [];
                 renderOrders();
+                checkLoadingComplete();
             });
 
             database.ref('completedorders').on('value', snapshot => {
                 completedOrders = snapshot.val() ? Object.values(snapshot.val()) : [];
                 renderOrders();
+                checkLoadingComplete();
             });
 
             function saveOrders() {
@@ -223,7 +266,15 @@
 
             orderReadyOverlay.addEventListener('click', hideOrderReadyOverlay);
 
-            renderOrders();
+            function checkLoadingComplete() {
+                if (document.readyState === "complete") {
+                    document.body.classList.remove("loading");
+                    document.body.classList.add("loaded");
+                }
+            }
+
+            checkLoadingComplete();
+            window.addEventListener('load', checkLoadingComplete);
         });
 
         window.hideOrderReadyOverlay = function() {
