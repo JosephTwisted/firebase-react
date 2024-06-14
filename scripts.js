@@ -181,3 +181,4 @@ window.hideOrderReadyOverlay = function () {
     orderReadyOverlay.style.display = 'none';
     videoContainer.classList.remove('blur');
 };
+)
