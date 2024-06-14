@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setInterval(updateOrderTimes, 60000);
 
-    window.addOrder = function() {
+    function addOrder() {
         let lastOrderTime = 0;
         if (ordersInProgress.length > 0) {
             lastOrderTime = Math.max(...ordersInProgress.map(order => order.timeLeft));
@@ -116,6 +116,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
         }
+    window.addOrder = function (orderNumber) {
+            let lastOrderTime = 0;
+            if (ordersInProgress.length > 0) {
+                lastOrderTime = Math.max(...ordersInProgress.map(order => order.timeLeft));
+            }
+            let timeLeft = prompt('Enter estimated time in minutes (press Enter for automatic):');
+            if (!timeLeft) {
+                timeLeft = lastOrderTime + 5;
+            } else {
+                timeLeft = parseInt(timeLeft);
+                if (isNaN(timeLeft) || timeLeft <= lastOrderTime) {
+                    alert(`Invalid time. Please enter a time greater than ${lastOrderTime} minutes.`);
+                    return;
+                }
+            }
         ordersInProgress.push({ number: orderNumber++, timeLeft });
         renderOrders();
         saveOrders();
@@ -149,38 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const orderIndex = completedOrders.findIndex(order => order.number === orderNumber);
         if (orderIndex !== -1) {
             completedOrders.splice(orderIndex, 1);
-            renderOrders();
-            saveOrders();
-        }
-    }
-
-    window.editOrder = function (orderNumber, event) {
-        event.stopPropagation();  // Prevent triggering complete or remove on edit click
-        const order = ordersInProgress.find(order => order.number === orderNumber) ||
-            completedOrders.find(order => order.number === orderNumber);
-        if (order) {
-            const newTime = prompt('Enter new time in minutes (leave empty to cancel):', order.timeLeft);
-            if (newTime !== null && newTime !== '') {
-                const parsedTime = parseInt(newTime);
-                if (!isNaN(parsedTime)) {
-                    order.timeLeft = parsedTime;
-                } else {
-                    alert('Invalid time entered.');
-                }
-            } else if (newTime === '') {
-                if (confirm('Are you sure you want to cancel this order?')) {
-                    if (ordersInProgress.includes(order)) {
-                        ordersInProgress = ordersInProgress.filter(o => o.number !== order.number);
-                    } else {
-                        completedOrders = completedOrders.filter(o => o.number !== order.number);
-                    }
-
-                    // Update the order number only if this was the last order
-                    if (order.number === orderNumber - 1) {
-                        orderNumber--;
-                    }
-                }
-            }
             renderOrders();
             saveOrders();
         }
