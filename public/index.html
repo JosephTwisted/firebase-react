@@ -7,6 +7,12 @@
     <link rel="stylesheet" href="styles.css">
     <link href="posey.ttf" rel="stylesheet">
     <link href="lufga.ttf" rel="stylesheet">
+    
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 </head>
 <body>
     <div id="last-order-number"></div>
@@ -26,27 +32,11 @@
     <div id="order-ready-overlay" onclick="hideOrderReadyOverlay()">
         <div id="order-ready-content"></div>
     </div>
-    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-
-    <!-- Add Firebase products that you want to use -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
     <!-- Inline JavaScript -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const ordersList = document.getElementById('orders-list');
-            const addOrderBtn = document.getElementById('add-order-btn');
-            const orderReadyOverlay = document.getElementById('order-ready-overlay');
-            const orderReadyContent = document.getElementById('order-ready-content');
-            const videoContainer = document.getElementById('video-container');
-            const lastOrderNumberDisplay = document.getElementById('last-order-number');
-
-            let orderNumber = 4; // Start with a number greater than the highest order number in the initial data
-            let ordersInProgress = [];
-            let completedOrders = [];
-
-            const firebaseConfig = {
+        // Firebase configuration
+        const firebaseConfig = {
         apiKey: "AIzaSyCq-IM7ymRZWD_cQDEarXeB2rH2rGkus0k",
         authDomain: "react-firebase-1211.firebaseapp.com",
         databaseURL: "https://react-firebase-1211-default-rtdb.europe-west1.firebasedatabase.app/",
@@ -55,9 +45,21 @@
         messagingSenderId: "497921033555",
         appId: "1:497921033555:web:ed7f6f22ac466bc1e90da6"
     };
- // Initialize Firebase
- firebase.initializeApp(firebaseConfig);
-            const database = firebase.database();
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const ordersList = document.getElementById('orders-list');
+            const orderReadyOverlay = document.getElementById('order-ready-overlay');
+            const orderReadyContent = document.getElementById('order-ready-content');
+            const videoContainer = document.getElementById('video-container');
+            const lastOrderNumberDisplay = document.getElementById('last-order-number');
+
+            let orderNumber = 4; // Start with a number greater than the highest order number in the initial data
+            let ordersInProgress = [];
+            let completedOrders = [];
 
             // Read data from Firebase Realtime Database
             database.ref('ordersinprogress').on('value', snapshot => {
