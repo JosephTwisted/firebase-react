@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     orderReadyOverlay.addEventListener('click', hideOrderReadyOverlay);
 
     renderOrders();
-});
+};
 
 window.hideOrderReadyOverlay = function () {
     const orderReadyOverlay = document.getElementById('order-ready-overlay');
@@ -180,4 +180,4 @@ window.hideOrderReadyOverlay = function () {
 
     orderReadyOverlay.style.display = 'none';
     videoContainer.classList.remove('blur');
-}
+};
