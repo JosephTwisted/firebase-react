@@ -1,9 +1,6 @@
 // src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import JobDetail from './components/JobDetail';
-import Login from './components/Login';
-import PostJob from './components/PostJob';
 
 function App() {
   return (

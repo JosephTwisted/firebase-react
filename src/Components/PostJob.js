@@ -1,4 +1,3 @@
-// src/components/PostJob.js
 import React, { useState } from 'react';
 import { database } from '../firebase';
 import { ref, push } from 'firebase/database';
