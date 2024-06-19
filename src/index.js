@@ -1,17 +1,37 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
+import ReactDOM from 'react-dom';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+import './styles.css';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
+// Import Firebase services
+import { database, auth } from './firebase';
+
+ReactDOM.render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>
+  </React.StrictMode>,
+  document.getElementById('root')
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCq-IM7ymRZWD_cQDEarXeB2rH2rGkus0k",
+  authDomain: "react-firebase-1211.firebaseapp.com",
+  databaseURL: "https://react-firebase-1211-default-rtdb.europe-west1.firebasedatabase.app/",
+  projectId: "react-firebase-1211",
+  storageBucket: "react-firebase-1211.appspot.com",
+  messagingSenderId: "497921033555",
+  appId: "1:497921033555:web:ed7f6f22ac466bc1e90da6"
+};
+
+
+// Export initialized services
+export { database, auth };
+
+// Render React application
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);

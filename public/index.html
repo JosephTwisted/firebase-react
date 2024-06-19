@@ -1,289 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hickory BBQ Joint - Order Status</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="posey.ttf" rel="stylesheet">
-    <link href="lufga.ttf" rel="stylesheet">
-    
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React Firebase Job Board</title>
     <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-
     <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-    
-    <!-- Loader CSS -->
-    <style>
-        .loader {
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            border: 16px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 16px solid #3498db;
-            width: 120px;
-            height: 120px;
-            -webkit-animation: spin 2s linear infinite;
-            animation: spin 2s linear infinite;
-            z-index: 9999;
-        }
-
-        @-webkit-keyframes spin {
-            0% { -webkit-transform: rotate(0deg); }
-            100% { -webkit-transform: rotate(360deg); }
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        body.loading {
-            overflow: hidden;
-        }
-
-        body.loading .loader {
-            display: block;
-        }
-
-        body.loaded .loader {
-            display: none;
-        }
-    </style>
-</head>
-<body class="loading">
-    <div class="loader"></div>
-    <div id="last-order-number"></div>
-    <div id="video-container">
-        <iframe id="background-video" src="https://www.youtube.com/embed/jReeajPdgSM?autoplay=1&mute=1&loop=1&playlist=jReeajPdgSM" frameborder="0" allow="autoplay; loop;" allowfullscreen></iframe>
-    </div>
-    <div id="orders-container">
-        <div id="orders">
-            <img src="logo.png" alt="Hickory BBQ Joint Logo" class="logo">
-            <h2>Orders</h2>
-            <div id="order-cards">
-                <ul id="orders-list" class="order-list"></ul>
-            </div>
-            <button id="add-order-btn" onclick="addOrder()">Add New Order</button>
-        </div>
-    </div>
-    <div id="order-ready-overlay" onclick="hideOrderReadyOverlay()">
-        <div id="order-ready-content"></div>
-    </div>
-
-    <!-- Inline JavaScript -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
     <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCq-IM7ymRZWD_cQDEarXeB2rH2rGkus0k",
-            authDomain: "react-firebase-1211.firebaseapp.com",
-            databaseURL: "https://react-firebase-1211-default-rtdb.europe-west1.firebasedatabase.app/",
-            projectId: "react-firebase-1211",
-            storageBucket: "react-firebase-1211.appspot.com",
-            messagingSenderId: "497921033555",
-            appId: "1:497921033555:web:ed7f6f22ac466bc1e90da6"
-        };
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCq-IM7ymRZWD_cQDEarXeB2rH2rGkus0k",
+        authDomain: "react-firebase-1211.firebaseapp.com",
+        databaseURL: "https://react-firebase-1211-default-rtdb.europe-west1.firebasedatabase.app/",
+        projectId: "react-firebase-1211",
+        storageBucket: "react-firebase-1211.appspot.com",
+        messagingSenderId: "497921033555",
+        appId: "1:497921033555:web:ed7f6f22ac466bc1e90da6"
+      };
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const ordersList = document.getElementById('orders-list');
-            const orderReadyOverlay = document.getElementById('order-ready-overlay');
-            const orderReadyContent = document.getElementById('order-ready-content');
-            const videoContainer = document.getElementById('video-container');
-            const lastOrderNumberDisplay = document.getElementById('last-order-number');
-
-            let orderNumber = 4; // Start with a number greater than the highest order number in the initial data
-            let ordersInProgress = [];
-            let completedOrders = [];
-
-            // Read data from Firebase Realtime Database
-            database.ref('ordersinprogress').on('value', snapshot => {
-                ordersInProgress = snapshot.val() ? Object.values(snapshot.val()) : [];
-                renderOrders();
-                checkLoadingComplete();
-            });
-
-            database.ref('completedorders').on('value', snapshot => {
-                completedOrders = snapshot.val() ? Object.values(snapshot.val()) : [];
-                renderOrders();
-                checkLoadingComplete();
-            });
-
-            function saveOrders() {
-                const ordersInProgressRef = database.ref('ordersinprogress');
-                ordersInProgressRef.set(ordersInProgress.reduce((obj, order) => {
-                    obj[order.number] = order;
-                    return obj;
-                }, {}));
-                
-                const completedOrdersRef = database.ref('completedorders');
-                completedOrdersRef.set(completedOrders.reduce((obj, order) => {
-                    obj[order.number] = order;
-                    return obj;
-                }, {}));
-            }
-
-            function renderOrders() {
-                ordersList.innerHTML = '';
-
-                // Append completed orders first
-                completedOrders.forEach(order => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <div class="order-number">#${String(order.number).padStart(3, '0')}</div>
-                        <div class="order-time">Ready</div>
-                        <div class="order-status">For Pickup</div>
-                        <button class="edit-order-btn" onclick="editOrder(${order.number}, event)"></button>
-                    `;
-                    li.className = 'finished';
-                    li.addEventListener('click', () => removeOrder(order.number));
-                    ordersList.appendChild(li);
-                });
-
-                // Append in-progress orders
-                ordersInProgress.forEach(order => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <div class="order-number">#${String(order.number).padStart(3, '0')}</div>
-                        <div class="order-time">${order.timeLeft} min</div>
-                        <div class="order-status">Being Prepared</div>
-                        <button class="edit-order-btn" onclick="editOrder(${order.number}, event)"></button>
-                    `;
-                    li.className = 'preparing';
-                    li.addEventListener('click', () => completeOrder(order.number));
-                    ordersList.appendChild(li);
-                });
-
-                // Update the last order number display
-                lastOrderNumberDisplay.textContent = orderNumber - 1;
-
-                // Scroll to the first order
-                ordersList.scrollTo(0, 0);
-            }
-
-            function updateOrderTimes() {
-                ordersInProgress.forEach(order => {
-                    if (order.timeLeft > 0) {
-                        order.timeLeft -= 1;
-                    }
-                });
-                renderOrders();
-                saveOrders();
-            }
-
-            setInterval(updateOrderTimes, 60000);
-
-            window.addOrder = function() {
-                let lastOrderTime = 0;
-                if (ordersInProgress.length > 0) {
-                    lastOrderTime = Math.max(...ordersInProgress.map(order => order.timeLeft));
-                }
-                let timeLeft = prompt('Enter estimated time in minutes (press Enter for automatic):');
-                if (!timeLeft) {
-                    timeLeft = lastOrderTime + 5;
-                } else {
-                    timeLeft = parseInt(timeLeft);
-                    if (isNaN(timeLeft) || timeLeft <= lastOrderTime) {
-                        alert(`Invalid time. Please enter a time greater than ${lastOrderTime} minutes.`);
-                        return;
-                    }
-                }
-                ordersInProgress.push({ number: orderNumber++, timeLeft });
-                renderOrders();
-                saveOrders();
-            }
-
-            window.completeOrder = function (orderNumber) {
-                const orderIndex = ordersInProgress.findIndex(order => order.number === orderNumber);
-                if (orderIndex !== -1) {
-                    const [order] = ordersInProgress.splice(orderIndex, 1);
-                    completedOrders.unshift(order);
-                    showOrderReady(order.number);
-                    renderOrders();
-                    saveOrders();
-                }
-            }
-
-            window.showOrderReady = function (orderNumber) {
-                const audio = new Audio('order-ready.mp3');
-                audio.play();
-                videoContainer.classList.add('blur');
-                orderReadyContent.textContent = `Order #${String(orderNumber).padStart(3, '0')} is Ready!`;
-                orderReadyOverlay.style.display = 'flex';
-            }
-
-            window.hideOrderReadyOverlay = function () {
-                orderReadyOverlay.style.display = 'none';
-                videoContainer.classList.remove('blur');
-            }
-
-            window.removeOrder = function (orderNumber) {
-                const orderIndex = completedOrders.findIndex(order => order.number === orderNumber);
-                if (orderIndex !== -1) {
-                    completedOrders.splice(orderIndex, 1);
-                    renderOrders();
-                    saveOrders();
-                }
-            }
-
-            window.editOrder = function (orderNumber, event) {
-                event.stopPropagation();  // Prevent triggering complete or remove on edit click
-                const order = ordersInProgress.find(order => order.number === orderNumber) ||
-                    completedOrders.find(order => order.number === orderNumber);
-                if (order) {
-                    const newTime = prompt('Enter new time in minutes (leave empty to cancel):', order.timeLeft);
-                    if (newTime !== null && newTime !== '') {
-                        const parsedTime = parseInt(newTime);
-                        if (!isNaN(parsedTime)) {
-                            order.timeLeft = parsedTime;
-                        } else {
-                            alert('Invalid time entered.');
-                        }
-                    } else if (newTime === '') {
-                        if (confirm('Are you sure you want to cancel this order?')) {
-                            if (ordersInProgress.includes(order)) {
-                                ordersInProgress = ordersInProgress.filter(o => o.number !== order.number);
-                            } else {
-                                completedOrders = completedOrders.filter(o => o.number !== order.number);
-                            }
-
-                            // Update the order number only if this was the last order
-                            if (order.number === orderNumber - 1) {
-                                orderNumber--;
-                            }
-                        }
-                    }
-                    renderOrders();
-                    saveOrders();
-                }
-            }
-
-            orderReadyOverlay.addEventListener('click', hideOrderReadyOverlay);
-
-            function checkLoadingComplete() {
-                if (document.readyState === "complete") {
-                    document.body.classList.remove("loading");
-                    document.body.classList.add("loaded");
-                }
-            }
-
-            checkLoadingComplete();
-            window.addEventListener('load', checkLoadingComplete);
-        });
-
-        window.hideOrderReadyOverlay = function() {
-            const orderReadyOverlay = document.getElementById('order-ready-overlay');
-            const videoContainer = document.getElementById('video-container');
-
-            orderReadyOverlay.style.display = 'none';
-            videoContainer.classList.remove('blur');
-        };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
     </script>
-</body>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script src="/Users/Jo/joltz-media/firebase-react/src/App.js"></script>
+  </body>
 </html>
